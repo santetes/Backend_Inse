@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Google Sign-In</title>
+    </head>
+    <body>
+        <h1>Google Sing-In</h1>
+        <div
+            id="g_id_onload"
+            data-client_id="442712775909-5i7nlqpi90cqpnokd4es51pfh2r741ad.apps.googleusercontent.com"
+            data-auto_prompt="false"
+            data-callback="handleCredentialResponse"
+        ></div>
+        <div
+            class="g_id_signin"
+            data-type="standard"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="rectangular"
+            data-logo_alignment="left"
+        ></div>
+
+        <button id="google-singout" style="margin-top: 1rem">Sing-Out</button>
+
+        <script>
+            function handleCredentialResponse(response) {
+                //Google Token
+                const id_token_google = response.credential
+                const body = {
+                    id_token_google,
+                }
+
+                //Esta comprobación se hace para llamar al metodo post bien a localHost si se está ejecutando el servidor en local o a heroku si se encuentra desplegado en la nuve
+                let url = window.location.hostname.includes('localhost')
+                    ? 'http://localhost:8080/api/auth/google'
+                    : 'https://rest-server-cafe-santetes.herokuapp.com/api/auth/google'
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body),
+                })
+                    .then((resp) => resp.json())
+                    .then((resp) => {
+                        console.log(resp)
+                        localStorage.setItem('email', resp.usuario.correo)
+                    })
+                    .catch(console.warm)
+            }
+
+            //Implementación de un boton para cerrar sesión de google - El elemento google se crea al ejecutar el script  (< src="https://accounts.google.com/gsi/client" async defer)
+
+            const button = document.getElementById('google-singout')
+            button.addEventListener('click', (e) => {
+                console.log(google.accounts.id)
+                google.accounts.id.disableAutoSelect()
+                google.accounts.id.revoke(
+                    localStorage.getItem('email'),
+                    (done) => {
+                        localStorage.clear()
+                        location.reload()
+                    }
+                )
+            })
+        </script>
+
+        <script
+            src="https://accounts.google.com/gsi/client"
+            async
+            defer
+        ></script>
+    </body>
+</html>
