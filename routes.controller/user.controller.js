@@ -35,6 +35,13 @@ const crearUsuario = async (req = request, res = response) => {
             const salt = bcrypt.genSaltSync()
             usuario.password = bcrypt.hashSync(password, salt)
 
+            // Le asignamos el role - por defecto USER_ROLE
+            const role =
+                email === 'sanmarti@ibv.org' || email === 'sanmartgon@gmail.com'
+                    ? 'ADMIN_ROLE'
+                    : 'USER_ROLE'
+            usuario.role = role
+
             // guardamos en bbdd
             await usuario.save()
 
