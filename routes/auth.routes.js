@@ -1,9 +1,19 @@
 const { Router, request, response } = require('express')
 const { check } = require('express-validator')
 const validarCampos = require('../middlewares/validar-campos')
-const { googleSingIn } = require('../routes.controller/auth.controller')
+const { googleSingIn, login } = require('../routes.controller/auth.controller')
 
 const router = Router()
+
+router.post(
+    '/',
+    [
+        check('email', 'el email es obligatorio').isEmail(),
+        check('password', 'la contraseña es obligatoria').not().isEmpty(),
+        validarCampos,
+    ],
+    login
+)
 
 router.post(
     '/google',

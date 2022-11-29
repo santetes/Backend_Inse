@@ -5,10 +5,14 @@ const usuarioSchema = new Schema({
         type: String,
         require: [true, 'el nombre es obligatorio'],
     },
-    correo: {
+    email: {
+        type: String,
+        require: [true, 'el correo es obligatorio'],
+        unique: true,
+    },
+    password: {
         type: String,
         require: true,
-        unique: [true, 'el correo es obligatorio'],
     },
     img: {
         type: String,
@@ -22,11 +26,15 @@ const usuarioSchema = new Schema({
         type: Boolean,
         default: true,
     },
+    google: {
+        type: Boolean,
+        default: false,
+    },
 })
 
 // Extraemos la versión y modificamos el valor por defecto de _id de la bbdd de mongo por el término uid
 usuarioSchema.methods.toJSON = function () {
-    const { __v, _id, ...usuario } = this.toObject()
+    const { __v, _id, password, ...usuario } = this.toObject()
     usuario.uid = _id
 
     return usuario

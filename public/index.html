@@ -49,9 +49,20 @@
                     .then((resp) => resp.json())
                     .then((resp) => {
                         console.log(resp)
-                        localStorage.setItem('email', resp.usuario.correo)
+                        // Compruebo si el usuario se encuetra borrado de la base de datos.
+                        // si es así, cierro su autenticación de google
+                        if (resp.ok === false) {
+                            google.accounts.id.revoke(
+                                resp.usuario.email,
+                                (done) => location.reload
+                            )
+                        } else {
+                            localStorage.setItem('email', resp.usuario.email)
+                        }
                     })
-                    .catch(console.warm)
+                    .catch((err) => {
+                        console.log(err)
+                    })
             }
 
             //Implementación de un boton para cerrar sesión de google - El elemento google se crea al ejecutar el script  (< src="https://accounts.google.com/gsi/client" async defer)
