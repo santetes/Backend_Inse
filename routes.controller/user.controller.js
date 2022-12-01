@@ -26,7 +26,8 @@ const crearUsuario = async (req = request, res = response) => {
 
         if (usuarioEnBBDD) {
             return res.status(400).json({
-                msg: 'El usuario ya se encuentra en la bbdd',
+                ok: false,
+                msg: 'Este email ya se encuentra registrado',
             })
         } else {
             const usuario = new Usuario(req.body)
@@ -46,15 +47,15 @@ const crearUsuario = async (req = request, res = response) => {
             await usuario.save()
 
             // generamos jwt
-            const token = await generarJWT(usuario._id)
+            const jwt = await generarJWT(usuario._id)
 
             return res
                 .status(200)
-                .json({ msg: 'usuario guardado en la bbdd', token })
+                .json({ ok: true, msg: 'usuario guardado en la bbdd', jwt })
         }
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ msg: 'algo salió mal' })
+        return res.status(500).json({ ok: false, msg: 'algo salió mal' })
     }
 }
 
