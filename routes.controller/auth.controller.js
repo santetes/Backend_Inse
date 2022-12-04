@@ -85,18 +85,18 @@ const googleSingIn = async (req = request, res = response) => {
 
             // Genero JWT extrayendo el id del usuario recien guardado en la bbdd
 
-            const token = await generarJWT(usuario.id)
+            const jwt = await generarJWT(usuario.id)
 
             return res.status(200).json({
                 ok: true,
                 msg: 'Usuario creado correctamente',
                 usuario,
-                token,
+                jwt,
             })
         }
-
         //Si el usuario existe, verificamos si el usuario aún estando en la bbdd su estado es false (borrado)
         // se envia el própio usuario para que se pueda cerrar sesión en google oAuth
+        // TODO: Mirar de no enviar el usuario completo, sino una modificación del usuario donde sólo se obtenga el email para cerrar la sesión
         if (usuario.estado === false) {
             return res.status(400).json({
                 ok: false,
@@ -106,9 +106,14 @@ const googleSingIn = async (req = request, res = response) => {
         }
 
         //generar JWT
-        const token = await generarJWT(usuario.id)
+        const jwt = await generarJWT(usuario.id)
 
-        res.json({ usuario, token })
+        res.json({
+            ok: true,
+            msg: 'Usuario autenticado correctamente',
+            usuario,
+            jwt,
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -118,4 +123,11 @@ const googleSingIn = async (req = request, res = response) => {
     }
 }
 
-module.exports = { login, googleSingIn }
+const renew = async (req = request, res = response) => {
+    const uid = req.uid
+    const jwt = await generarJWT(uid)
+
+    res.status(200).json({ ok: true, msg: 'token renovado correctamente', jwt })
+}
+
+module.exports = { login, googleSingIn, renew }

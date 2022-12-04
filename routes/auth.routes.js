@@ -1,12 +1,17 @@
 const { Router, request, response } = require('express')
 const { check } = require('express-validator')
 const validarCampos = require('../middlewares/validar-campos')
-const { googleSingIn, login } = require('../routes.controller/auth.controller')
+const { validarJWT } = require('../middlewares/validarJWT')
+const {
+    googleSingIn,
+    login,
+    renew,
+} = require('../routes.controller/auth.controller')
 
 const router = Router()
 
 router.post(
-    '/',
+    '/login',
     [
         check('email', 'el email es obligatorio').isEmail(),
         check('password', 'la contraseña es obligatoria').not().isEmpty(),
@@ -25,5 +30,7 @@ router.post(
     ],
     googleSingIn
 )
+
+router.get('/renew', [validarJWT, validarCampos], renew)
 
 module.exports = router

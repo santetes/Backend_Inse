@@ -6,7 +6,9 @@ const validarJWT = (req = request, res = response, next) => {
     const token = req.header('x-token')
 
     if (!token) {
-        return res.status(401).json({ msg: 'no existe token en la petición' })
+        return res
+            .status(401)
+            .json({ ok: false, msg: 'no existe token en la petición' })
     }
 
     try {
@@ -14,7 +16,7 @@ const validarJWT = (req = request, res = response, next) => {
         req.uid = uid //introducimos en la petición en valor del uid para saber que usuario ha realizado la petición
         next()
     } catch (error) {
-        return res.status(401).json({ msg: 'token incorrecto' })
+        return res.status(401).json({ ok: false, msg: 'token incorrecto' })
     }
 }
 
