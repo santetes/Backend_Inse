@@ -65,9 +65,11 @@ const googleSingIn = async (req = request, res = response) => {
         let usuario = await Usuario.findOne({ email })
 
         if (!usuario) {
-            // Detecto si el usuario a crear es sanmarti y le asigno el rol de administrador. Por defecto es user
+            // Detecto si el usuario a crear es sanmarti o sanmartgon y le asigno el rol de administrador. Por defecto es user
             const role =
-                email === 'sanmarti@ibv.org' ? 'ADMIN_ROLE' : 'USER_ROLE'
+                email === 'sanmarti@ibv.org' || email === 'sanmartgon@gmail.com'
+                    ? 'ADMIN_ROLE'
+                    : 'USER_ROLE'
             // password por defecto si es usuario de google
             const password = 'xxx'
             // indico que es un usuario creado con google
@@ -108,7 +110,7 @@ const googleSingIn = async (req = request, res = response) => {
         //generar JWT
         const jwt = await generarJWT(usuario.id)
 
-        res.json({
+        return res.json({
             ok: true,
             msg: 'Usuario autenticado correctamente',
             usuario,
@@ -116,18 +118,40 @@ const googleSingIn = async (req = request, res = response) => {
         })
     } catch (error) {
         console.log(error)
-        res.status(500).json({
+        return res.status(500).json({
             ok: false,
             msg: 'Algo salió mal :(',
         })
     }
 }
 
+// este endPoint además de renovar el jwt. valida que el usuario es correcto y devuelve el própio
+// Usuario para la autenticación en el frontEnd
 const renew = async (req = request, res = response) => {
     const uid = req.uid
     const jwt = await generarJWT(uid)
 
-    res.status(200).json({ ok: true, msg: 'token renovado correctamente', jwt })
+    const usuario = await Usuario.findById(uid)
+
+    if (!usuario) {
+        return res.status(400).json({
+            ok: false,
+            msg: 'no existe usuario con esta autenticación',
+        })
+    }
+    if (usuario.estado === false) {
+        return res.status(400).json({
+            ok: false,
+            msg: 'usuario borrado de la base de datos',
+        })
+    }
+
+    return res.status(200).json({
+        ok: true,
+        msg: 'token renovado correctamente',
+        jwt,
+        usuario,
+    })
 }
 
 module.exports = { login, googleSingIn, renew }

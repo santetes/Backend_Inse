@@ -8,6 +8,7 @@ const getUsuarios = async (req = request, res = response) => {
         const usuarios = await Usuario.find()
 
         res.json({
+            ok: true,
             usuarios,
         })
     } catch (error) {
@@ -84,8 +85,14 @@ const actualizaUsuario = async (req = request, res = response) => {
         }
 
         // Comprobamos si el usuario google y protegemos que no pueda modificar su email
-        if (usuarioDb.google) {
+        if (usuarioDb.google && campos.email != usuarioDb.email) {
             campos.email = usuarioDb.email
+            return res
+                .status(400)
+                .json({
+                    ok: false,
+                    msg: 'Una cuenta de google no puede modificar su email',
+                })
         }
 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(
