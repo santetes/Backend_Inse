@@ -6,6 +6,7 @@ const {
     actualizaUsuario,
 } = require('../routes.controller/user.controller')
 const { validarJWT } = require('../middlewares/validarJWT')
+const { isAdminRole } = require('../middlewares/isAdminRole')
 const validarCampos = require('../middlewares/validar-campos')
 
 const router = Router()
@@ -23,6 +24,6 @@ router.post(
     crearUsuario
 )
 
-router.put('/:id', [validarJWT, validarCampos], actualizaUsuario)
+router.put('/:id', [validarJWT, isAdminRole, validarCampos], actualizaUsuario)
 
 module.exports = router

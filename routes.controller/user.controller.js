@@ -61,9 +61,11 @@ const crearUsuario = async (req = request, res = response) => {
 }
 
 const actualizaUsuario = async (req = request, res = response) => {
-    const uid = req.params.id
+    const uid_usuarioModificar = req.params.id
+    const uid_usuarioPeticion = req.uid
+
     try {
-        const usuarioDb = await Usuario.findById(uid)
+        const usuarioDb = await Usuario.findById(uid_usuarioModificar)
         if (!usuarioDb) {
             return res.status(404).json({
                 ok: false,
@@ -84,19 +86,36 @@ const actualizaUsuario = async (req = request, res = response) => {
             })
         }
 
-        // Comprobamos si el usuario google y protegemos que no pueda modificar su email
+        // Comprobamos si es usuario google y protegemos que no pueda modificar su email
         if (usuarioDb.google && campos.email != usuarioDb.email) {
             campos.email = usuarioDb.email
-            return res
-                .status(400)
-                .json({
-                    ok: false,
-                    msg: 'Una cuenta de google no puede modificar su email',
-                })
+            return res.status(400).json({
+                ok: false,
+                msg: 'Una cuenta de google no puede modificar su email',
+            })
+        }
+
+        // El usuario que realiza la petición no puede autoborrarse
+        if (!campos.estado && uid_usuarioPeticion === uid_usuarioModificar) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Un usuario no puede borrarse a sí mismo',
+            })
+        }
+
+        // Un usuario no puede cambiarse el role a sí mismo
+        if (
+            campos.role != usuarioDb.role &&
+            uid_usuarioPeticion === uid_usuarioModificar
+        ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'un usuario no puede modificar el rol de sí mismo',
+            })
         }
 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(
-            uid,
+            uid_usuarioModificar,
             campos,
             { returnDocument: 'after' }
         )
