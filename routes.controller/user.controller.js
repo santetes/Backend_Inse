@@ -117,7 +117,7 @@ const actualizaUsuario = async (req = request, res = response) => {
         const usuarioActualizado = await Usuario.findByIdAndUpdate(
             uid_usuarioModificar,
             campos,
-            { returnDocument: 'after' }
+            { returnDocument: 'after', runValidators: true }
         )
 
         res.json({

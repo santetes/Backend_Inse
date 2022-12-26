@@ -24,6 +24,16 @@ router.post(
     crearUsuario
 )
 
-router.put('/:id', [validarJWT, isAdminRole, validarCampos], actualizaUsuario)
+router.put(
+    '/:id',
+    [
+        validarJWT,
+        isAdminRole,
+        check('nombre', 'el nombre es obligatorio').not().isEmpty(),
+        check('email', 'el email es obligatorio').isEmail(),
+        validarCampos,
+    ],
+    actualizaUsuario
+)
 
 module.exports = router
